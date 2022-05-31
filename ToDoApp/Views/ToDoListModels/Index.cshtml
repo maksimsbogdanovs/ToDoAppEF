@@ -4,7 +4,6 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -19,7 +18,10 @@
                 @Html.DisplayNameFor(model => model.Created)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Urgencylevel)
+                @Html.DisplayNameFor(model => model.DueDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsDone)
             </th>
             <th></th>
         </tr>
@@ -31,17 +33,37 @@
                 @Html.DisplayFor(modelItem => item.ToDoListItem)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Created)
+                @Html.Raw(item.Created.ToString("dd.MM.yyyy"))
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Urgencylevel)
+                @Html.Raw(item.Created.ToString("dd.MM.yyyy"))
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ToDoId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ToDoId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ToDoId">Delete</a>
+                <form method="post" asp-action="Done" asp-route-id="@item.ToDoId">
+                    <input type="submit" value="Done" class="btn btn-primary"/>
+                </form>
+
+                @*@Html.CheckBoxFor(modelItem => item.IsDone, new { id = @item.ToDoId})*@
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.ToDoId">Details</a>
             </td>
         </tr>
 }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        $(document).ready(()=> {
+            $( "input:checkbox" ).click(e => {
+                let data = {
+                    id: $(e.target).attr('id'),
+                    isDone: $(e.target).is(':checked')
+                }
+              
+                $.post( "ToDoListModels/update", data, function( response ) {});
+            })
+        })
+    </script>
+}

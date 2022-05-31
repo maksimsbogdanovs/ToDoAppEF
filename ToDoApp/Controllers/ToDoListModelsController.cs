@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Context;
 using ToDoApp.Models;
@@ -18,14 +13,49 @@ namespace ToDoApp.Controllers
         {
             _context = context;
         }
+        public IActionResult Index()
+        {
+            List<ToDoListModel> toDoList = (from ToDoListModel in _context.ToDoListModel
+                                            where !ToDoListModel.IsDone
+                                            select ToDoListModel).ToList();
+
+            return View(toDoList);
+        }
+
+        // POST: ToDoListModels/Done
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Done(int id)
+        {
+            var toDoList = _context.ToDoListModel.Where(m => m.ToDoId == id).FirstOrDefault();
+            toDoList.IsDone = true;
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        //[HttpPost]
+        //public async Task<IActionResult> Update(int id, bool isDone)
+        //{
+        //    var item = await _context.ToDoListModel.FirstOrDefaultAsync(i => i.ToDoId == id);
+        //    if (item != null)
+        //    {
+        //        item.IsDone = isDone;
+        //        _context.Update(item);
+        //        await _context.SaveChangesAsync();
+        //    }
+
+        //    return Ok();
+        //}
 
         // GET: ToDoListModels
-        public async Task<IActionResult> Index()
-        {
-              return _context.ToDoListModel != null ? 
-                          View(await _context.ToDoListModel.ToListAsync()) :
-                          Problem("Entity set 'ToDoContext.ToDoListModel'  is null.");
-        }
+        //public async Task<IActionResult> Index()
+        //{
+        //      return _context.ToDoListModel != null ? 
+        //                  View(await _context.ToDoListModel.ToListAsync()) :
+        //                  Problem("Entity set 'ToDoContext.ToDoListModel'  is null.");
+        //}
 
         // GET: ToDoListModels/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -56,7 +86,7 @@ namespace ToDoApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ToDoId,ToDoListItem,Created,Urgencylevel")] ToDoListModel toDoListModel)
+        public async Task<IActionResult> Create([Bind("ToDoId,ToDoListItem,Created,Urgencylevel,DueDate,IsDone")] ToDoListModel toDoListModel)
         {
             if (ModelState.IsValid)
             {
@@ -88,7 +118,7 @@ namespace ToDoApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ToDoId,ToDoListItem,Created,Urgencylevel")] ToDoListModel toDoListModel)
+        public async Task<IActionResult> Edit(int id, [Bind("ToDoId,ToDoListItem,Created,Urgencylevel,DueDate,IsDone")] ToDoListModel toDoListModel)
         {
             if (id != toDoListModel.ToDoId)
             {

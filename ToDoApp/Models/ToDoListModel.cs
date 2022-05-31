@@ -19,6 +19,12 @@ namespace ToDoApp.Models
         [DisplayName("Urgency level")]
         public string? Urgencylevel { get; set; }
 
+        [DisplayName("Due Date")]
+        public DateTime? DueDate { get; set; }
+
+        [DisplayName("Is Done")]
+        public bool IsDone { get; set; }
+
 
     }
 }

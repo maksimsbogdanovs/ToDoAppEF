@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<ToDoApp.Models.ToDoListModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "History";
 }
 
+<h3>
+    Already done:
+</h3> <br/>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -23,10 +23,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.Urgencylevel)
             </th> 
-            <th>
-                @Html.DisplayNameFor(model => model.IsDone)
-            </th>
-            <th></th>
             <th></th>
         </tr>
     </thead>
@@ -42,19 +38,9 @@
             <td>
                 @Html.Raw(item.DueDate?.ToString("dd.MM.yyyy"))
             </td>
-            
             <td>
                 @Html.DisplayFor(modelItem => item.Urgencylevel)
             </td> 
-            <td>
-                <form method="post" asp-action="Done" asp-route-id="@item.ToDoId">
-                    <input type="submit" value="Done" class="btn btn-primary"/>
-                </form>
-                @*@Html.CheckBoxFor(modelItem => item.IsDone, new { id = @item.ToDoId})*@
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ToDoId">Edit</a>
-            </td>
             <td>
                 <a asp-action="Delete" asp-route-id="@item.ToDoId">Delete</a>
             </td>
@@ -63,17 +49,3 @@
     </tbody>
 </table>
 
-@section Scripts {
-    <script>
-        $(document).ready(()=> {
-            $( "input:checkbox" ).click(e => {
-                let data = {
-                    id: $(e.target).attr('id'),
-                    isDone: $(e.target).is(':checked')
-                }
-              
-                $.post( "ToDoListModels/update", data, function( response ) {});
-            })
-        })
-    </script>
-}

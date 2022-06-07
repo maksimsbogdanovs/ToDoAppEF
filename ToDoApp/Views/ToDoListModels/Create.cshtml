@@ -17,12 +17,19 @@
                 <input asp-for="ToDoListItem" class="form-control" />
                 <span asp-validation-for="ToDoListItem" class="text-danger"></span>
             </div>
-
+            <br />
             <div class="form-group">
                 <label asp-for="DueDate" class="control-label"></label>
                 <input asp-for="DueDate" class="form-control" />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Urgencylevel" class="control-label"></label> <br />
+                <select name="Urgencylevel" asp-items="Html.GetEnumSelectList<UrgencyLevels>()"></select>
+                <span class="field__validation-message" asp-validation-for="Urgencylevel" class="text-danger"></span>
+            </div>
+            <br />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

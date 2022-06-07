@@ -90,8 +90,16 @@ namespace ToDoApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(toDoListModel);
-                await _context.SaveChangesAsync();
+                ILogger historyLogger = new HistoryLogger();
+                CheckCanLog(historyLogger);
+
+                void CheckCanLog(ILogger logger)
+                {
+                    logger.Log(toDoListModel, _context);
+                }
+
+             //   _context.Add(toDoListModel);
+             //   await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(toDoListModel);
@@ -188,6 +196,23 @@ namespace ToDoApp.Controllers
         private bool ToDoListModelExists(int id)
         {
           return (_context.ToDoListModel?.Any(e => e.ToDoId == id)).GetValueOrDefault();
+        }
+
+        public IActionResult History()
+        {
+            List<ToDoListModel> toDoList = (from ToDoListModel in _context.ToDoListModel
+                                            where ToDoListModel.IsDone
+                                            select ToDoListModel).ToList();
+
+            return View(toDoList);
+        }
+
+        // GET: ToDoListModels
+        public async Task<IActionResult> AllToDos()
+        {
+              return _context.ToDoListModel != null ? 
+                          View(await _context.ToDoListModel.ToListAsync()) :
+                          Problem("Entity set 'ToDoContext.ToDoListModel'  is null.");
         }
     }
 }

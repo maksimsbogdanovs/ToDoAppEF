@@ -1,13 +1,9 @@
 ﻿@model IEnumerable<ToDoApp.Models.ToDoListModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "AllToDos";
 }
 
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -26,8 +22,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.IsDone)
             </th>
-            <th></th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -47,33 +41,9 @@
                 @Html.DisplayFor(modelItem => item.Urgencylevel)
             </td> 
             <td>
-                <form method="post" asp-action="Done" asp-route-id="@item.ToDoId">
-                    <input type="submit" value="Done" class="btn btn-primary"/>
-                </form>
-                @*@Html.CheckBoxFor(modelItem => item.IsDone, new { id = @item.ToDoId})*@
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ToDoId">Edit</a>
-            </td>
-            <td>
-                <a asp-action="Delete" asp-route-id="@item.ToDoId">Delete</a>
+                @Html.DisplayFor(modelItem => item.IsDone)
             </td>
         </tr>
 }
     </tbody>
 </table>
-
-@section Scripts {
-    <script>
-        $(document).ready(()=> {
-            $( "input:checkbox" ).click(e => {
-                let data = {
-                    id: $(e.target).attr('id'),
-                    isDone: $(e.target).is(':checked')
-                }
-              
-                $.post( "ToDoListModels/update", data, function( response ) {});
-            })
-        })
-    </script>
-}

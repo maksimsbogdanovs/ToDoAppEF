@@ -17,7 +17,7 @@ namespace ToDoApp.Models
         public DateTime Created { get; set; }
 
         [DisplayName("Urgency level")]
-        public string? Urgencylevel { get; set; }
+        public UrgencyLevels? Urgencylevel { get; set; }
 
         [DisplayName("Due Date")]
         public DateTime? DueDate { get; set; }

@@ -5,6 +5,6 @@ namespace ToDoApp
 {
     internal interface ILogger
     {
-        void Log(ToDoListModel toDoListModel, ToDoContext context);
+        void Log(string toDoLine);
     }
 }

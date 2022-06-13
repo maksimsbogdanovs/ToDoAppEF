@@ -1,0 +1,8 @@
+
+insert : 25 - Izplānot atvaļinājumu - 13.06.2022 19:18:24
+edit : 11 - nopirkt pienu! - 13.06.2022 19:18:30
+delete : 10 - aizbraukt ciemos - 13.06.2022 19:18:46
+done : 11 - nopirkt pienu! - 13.06.2022 19:21:42
+done : 14 - Sporta nodarbiba - 13.06.2022 19:21:44
+delete : 11 - nopirkt pienu! - 13.06.2022 19:22:19
+delete : 14 - Sporta nodarbiba - 13.06.2022 19:22:26

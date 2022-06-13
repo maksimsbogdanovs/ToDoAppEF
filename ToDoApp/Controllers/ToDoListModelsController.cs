@@ -5,7 +5,7 @@ using ToDoApp.Models;
 
 namespace ToDoApp.Controllers
 {
-    public class ToDoListModelsController : Controller
+    public class ToDoListModelsController : BaseController
     {
         private readonly ToDoContext _context;
 
@@ -13,7 +13,7 @@ namespace ToDoApp.Controllers
         {
             _context = context;
         }
-        public IActionResult Index()
+        public override IActionResult Index()
         {
             List<ToDoListModel> toDoList = (from ToDoListModel in _context.ToDoListModel
                                             where !ToDoListModel.IsDone
@@ -29,6 +29,17 @@ namespace ToDoApp.Controllers
         {
             var toDoList = _context.ToDoListModel.Where(m => m.ToDoId == id).FirstOrDefault();
             toDoList.IsDone = true;
+
+            ILogger historyFileLogger = new HistoryFileLogger();
+            CheckCanLog(historyFileLogger);
+
+            void CheckCanLog(ILogger logger)
+            {
+                DateTime dateNow = DateTime.Now;
+                string line = $"done : {toDoList.ToDoId} - {toDoList.ToDoListItem} - {dateNow}";
+                logger.Log(line);
+            }
+
             _context.SaveChanges();
 
             return RedirectToAction(nameof(Index));
@@ -76,7 +87,7 @@ namespace ToDoApp.Controllers
         }
 
         // GET: ToDoListModels/Create
-        public IActionResult Create()
+        public new IActionResult Create()
         {
             return View();
         }
@@ -90,16 +101,18 @@ namespace ToDoApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                ILogger historyLogger = new HistoryLogger();
-                CheckCanLog(historyLogger);
+                _context.Add(toDoListModel);
+                await _context.SaveChangesAsync();
+
+                ILogger historyFileLogger = new HistoryFileLogger();
+                CheckCanLog(historyFileLogger);
 
                 void CheckCanLog(ILogger logger)
                 {
-                    logger.Log(toDoListModel, _context);
+                    string line = $"insert : {toDoListModel.ToDoId} - {toDoListModel.ToDoListItem} - {toDoListModel.Created}"; 
+                    logger.Log(line); 
                 }
 
-             //   _context.Add(toDoListModel);
-             //   await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(toDoListModel);
@@ -139,6 +152,16 @@ namespace ToDoApp.Controllers
                 {
                     _context.Update(toDoListModel);
                     await _context.SaveChangesAsync();
+
+                    ILogger historyFileLogger = new HistoryFileLogger();
+                    CheckCanLog(historyFileLogger);
+
+                    void CheckCanLog(ILogger logger)
+                    {
+                        DateTime dateNow = DateTime.Now;
+                        string line = $"edit : {toDoListModel.ToDoId} - {toDoListModel.ToDoListItem} - {dateNow}";
+                        logger.Log(line);
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -187,6 +210,16 @@ namespace ToDoApp.Controllers
             if (toDoListModel != null)
             {
                 _context.ToDoListModel.Remove(toDoListModel);
+
+                ILogger historyFileLogger = new HistoryFileLogger();
+                CheckCanLog(historyFileLogger);
+
+                void CheckCanLog(ILogger logger)
+                {
+                    DateTime dateNow = DateTime.Now;
+                    string line = $"delete : {toDoListModel.ToDoId} - {toDoListModel.ToDoListItem} - {dateNow}";
+                    logger.Log(line);
+                }
             }
             
             await _context.SaveChangesAsync();
@@ -214,5 +247,7 @@ namespace ToDoApp.Controllers
                           View(await _context.ToDoListModel.ToListAsync()) :
                           Problem("Entity set 'ToDoContext.ToDoListModel'  is null.");
         }
+
+
     }
 }

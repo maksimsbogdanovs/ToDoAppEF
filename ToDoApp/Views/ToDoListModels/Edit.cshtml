@@ -2,6 +2,15 @@
 
 @{
     ViewData["Title"] = "Edit";
+    var selectList = Html.GetEnumSelectList<UrgencyLevels>();
+
+    foreach (var item in selectList)
+    {
+        if (item.Text == Model.Urgencylevel.ToString())
+        {
+            item.Selected = true;
+        }
+    }
 }
 
 <h1>Edit</h1>
@@ -27,7 +36,7 @@
             <br />
             <div class="form-group">
                 <label asp-for="Urgencylevel" class="control-label"></label> <br />
-                <select name="Urgencylevel" asp-items="Html.GetEnumSelectList<UrgencyLevels>()"></select>
+                <select name="Urgencylevel" asp-items=selectList ></select>
                 <span class="field__validation-message" asp-validation-for="Urgencylevel" class="text-danger"></span>
             </div>
             <br />

@@ -1,6 +1,6 @@
 ﻿namespace ToDoApp
 {
-    public /*static*/ class ConfigurationModel
+    public class ConfigurationModel
     {
         public static string AppName = "My Daily ToDo list";
 

@@ -8,7 +8,15 @@ namespace ToDoApp
         public void Log(string toDoLine)
         { 
             var lines = new string[] { toDoLine };
-            File.AppendAllLines("toDoLogs.txt", lines);
+            if (File.Exists("toDoLogs.txt"))
+            {
+                File.AppendAllLines("toDoLogs.txt", lines);
+            }
+            else
+            {
+                File.WriteAllLines("toDoLogs.txt", lines);
+            }
+                
         }
     }
 }

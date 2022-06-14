@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Context;
+using ToDoApp.Excteptions;
 using ToDoApp.Models;
 
 namespace ToDoApp.Controllers
@@ -115,6 +116,17 @@ namespace ToDoApp.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+
+            if (string.IsNullOrEmpty(toDoListModel.ToDoListItem))
+            {
+                throw new NotValidTextException("Lietotājs nav ievadījis tekstu");
+            }
+
+            if (toDoListModel.DueDate <= DateTime.Now)
+            {
+                throw new NotValidDateException("Lietotājs norādījis atpakaļejošu datumu");
+            }
+
             return View(toDoListModel);
         }
 
@@ -131,6 +143,17 @@ namespace ToDoApp.Controllers
             {
                 return NotFound();
             }
+
+            if (string.IsNullOrEmpty(toDoListModel.ToDoListItem))
+            {
+                throw new NotValidTextException("Lietotājs nav ievadījis tekstu");
+            }
+
+            if (toDoListModel.DueDate <= DateTime.Now)
+            {
+                throw new NotValidDateException("Lietotājs norādījis atpakaļejošu datumu");
+            }
+
             return View(toDoListModel);
         }
 

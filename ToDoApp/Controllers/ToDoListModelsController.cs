@@ -14,11 +14,20 @@ namespace ToDoApp.Controllers
         {
             _context = context;
         }
+
         public override IActionResult Index()
         {
-            List<ToDoListModel> toDoList = (from ToDoListModel in _context.ToDoListModel
-                                            where !ToDoListModel.IsDone
-                                            select ToDoListModel).ToList();
+            if (_context.ToDoListModel == null)
+            {
+                return NotFound();
+            }
+
+            List<ToDoListModel> toDoList = _context.ToDoListModel.Where(m => m.IsDone == false).ToList<ToDoListModel>();
+
+            if (toDoList == null)
+            {
+                return NotFound();
+            }
 
             return View(toDoList);
         }
@@ -26,9 +35,20 @@ namespace ToDoApp.Controllers
         // POST: ToDoListModels/Done
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Done(int id)
+        public IActionResult Done(int? id)
         {
+            if (id == null || _context.ToDoListModel == null)
+            {
+                return NotFound();
+            }
+
             var toDoList = _context.ToDoListModel.Where(m => m.ToDoId == id).FirstOrDefault();
+
+            if (toDoList == null)
+            {
+                return NotFound();
+            }
+
             toDoList.IsDone = true;
 
             ILogger historyFileLogger = new HistoryFileLogger();
@@ -42,10 +62,8 @@ namespace ToDoApp.Controllers
             }
 
             _context.SaveChanges();
-
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));        
         }
-
 
         //[HttpPost]
         //public async Task<IActionResult> Update(int id, bool isDone)
@@ -70,25 +88,23 @@ namespace ToDoApp.Controllers
         //}
 
         // GET: ToDoListModels/Details/5
-        public async Task<IActionResult> Details(int? id)
+        /*public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.ToDoListModel == null)
             {
                 return NotFound();
             }
 
-            var toDoListModel = await _context.ToDoListModel
-                .FirstOrDefaultAsync(m => m.ToDoId == id);
-            if (toDoListModel == null)
-            {
-                return NotFound();
-            }
+            // var toDoListModel = await _context.ToDoListModel.FirstOrDefaultAsync(m => m.ToDoId == id);
 
-            return View(toDoListModel);
-        }
+            return _context.ToDoListModel != null ? 
+                View(await _context.ToDoListModel.FirstOrDefaultAsync(m => m.ToDoId == id)) : 
+                    NotFound();
+
+        }*/
 
         // GET: ToDoListModels/Create
-        public new IActionResult Create()
+        public IActionResult Create()
         {
             return View();
         }
@@ -100,6 +116,16 @@ namespace ToDoApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ToDoId,ToDoListItem,Created,Urgencylevel,DueDate,IsDone")] ToDoListModel toDoListModel)
         {
+            if (string.IsNullOrEmpty(toDoListModel.ToDoListItem))
+            {
+                throw new NotValidTextException("Lietotājs nav ievadījis tekstu");
+            }
+
+            if (toDoListModel.DueDate <= DateTime.Now)
+            {
+                throw new NotValidDateException("Lietotājs norādījis atpakaļejošu datumu");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(toDoListModel);
@@ -117,16 +143,6 @@ namespace ToDoApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (string.IsNullOrEmpty(toDoListModel.ToDoListItem))
-            {
-                throw new NotValidTextException("Lietotājs nav ievadījis tekstu");
-            }
-
-            if (toDoListModel.DueDate <= DateTime.Now)
-            {
-                throw new NotValidDateException("Lietotājs norādījis atpakaļejošu datumu");
-            }
-
             return View(toDoListModel);
         }
 
@@ -139,6 +155,7 @@ namespace ToDoApp.Controllers
             }
 
             var toDoListModel = await _context.ToDoListModel.FindAsync(id);
+
             if (toDoListModel == null)
             {
                 return NotFound();
@@ -210,8 +227,8 @@ namespace ToDoApp.Controllers
                 return NotFound();
             }
 
-            var toDoListModel = await _context.ToDoListModel
-                .FirstOrDefaultAsync(m => m.ToDoId == id);
+            var toDoListModel = await _context.ToDoListModel.FirstOrDefaultAsync(m => m.ToDoId == id);
+
             if (toDoListModel == null)
             {
                 return NotFound();
@@ -227,22 +244,26 @@ namespace ToDoApp.Controllers
         {
             if (_context.ToDoListModel == null)
             {
-                return Problem("Entity set 'ToDoContext.ToDoListModel'  is null.");
+                return NotFound();
             }
+
             var toDoListModel = await _context.ToDoListModel.FindAsync(id);
-            if (toDoListModel != null)
+
+            if (toDoListModel == null)
             {
-                _context.ToDoListModel.Remove(toDoListModel);
+                return NotFound();
+            }
 
-                ILogger historyFileLogger = new HistoryFileLogger();
-                CheckCanLog(historyFileLogger);
+            _context.ToDoListModel.Remove(toDoListModel);
 
-                void CheckCanLog(ILogger logger)
-                {
-                    DateTime dateNow = DateTime.Now;
-                    string line = $"delete : {toDoListModel.ToDoId} - {toDoListModel.ToDoListItem} - {dateNow}";
-                    logger.Log(line);
-                }
+            ILogger historyFileLogger = new HistoryFileLogger();
+            CheckCanLog(historyFileLogger);
+
+            void CheckCanLog(ILogger logger)
+            {
+                DateTime dateNow = DateTime.Now;
+                string line = $"delete : {toDoListModel.ToDoId} - {toDoListModel.ToDoListItem} - {dateNow}";
+                logger.Log(line);
             }
             
             await _context.SaveChangesAsync();
@@ -251,26 +272,42 @@ namespace ToDoApp.Controllers
 
         private bool ToDoListModelExists(int id)
         {
-          return (_context.ToDoListModel?.Any(e => e.ToDoId == id)).GetValueOrDefault();
+            return (_context.ToDoListModel?.Any(e => e.ToDoId == id)).GetValueOrDefault();
         }
 
         public IActionResult History()
         {
-            List<ToDoListModel> toDoList = (from ToDoListModel in _context.ToDoListModel
-                                            where ToDoListModel.IsDone
-                                            select ToDoListModel).ToList();
+            if (_context.ToDoListModel == null)
+            {
+                return NotFound();
+            }
+
+            List<ToDoListModel> toDoList = _context.ToDoListModel.Where(m => m.IsDone == true).ToList<ToDoListModel>();
+
+            if (toDoList == null)
+            {
+                return NotFound();
+            }
 
             return View(toDoList);
         }
 
         // GET: ToDoListModels
-        public async Task<IActionResult> AllToDos()
+        public IActionResult AllToDos()
         {
-              return _context.ToDoListModel != null ? 
-                          View(await _context.ToDoListModel.ToListAsync()) :
-                          Problem("Entity set 'ToDoContext.ToDoListModel'  is null.");
+            if (_context.ToDoListModel == null)
+            {
+                return NotFound();
+            }
+
+            List<ToDoListModel> toDoList = _context.ToDoListModel.ToList();
+
+            if (toDoList == null)
+            {
+                return NotFound();
+            }
+
+            return View(toDoList);
         }
-
-
     }
 }

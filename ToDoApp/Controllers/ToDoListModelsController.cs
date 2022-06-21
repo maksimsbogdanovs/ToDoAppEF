@@ -17,6 +17,7 @@ namespace ToDoApp.Controllers
 
         public override IActionResult Index()
         {
+
             if (_context.ToDoListModel == null)
             {
                 return NotFound();
